@@ -1,0 +1,28 @@
+name: CompassBench CI
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Auto-test de l'analyse hors ligne
+        run: python3 analysis/compass_analysis.py --self-test
+      - name: Vérifier que le projet Xcode est à jour
+        run: python3 scripts/generate-project.py --check
+      - name: Tester le coeur mathématique
+        run: swift test
+      - name: Compiler l'app pour iPhone (IPA non signée)
+        run: bash scripts/build-ios.sh
+      - name: Publier l'IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: CompassBench-unsigned
+          path: build/CompassBench-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30
