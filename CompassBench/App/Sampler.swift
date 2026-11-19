@@ -18,7 +18,7 @@ public final class Sampler: NSObject, ObservableObject, @preconcurrency CLLocati
     private let motion = CMMotionManager()
     private var heading: CLHeading?
     private var recording = false
-    private var start: TimeInterval = 0
+    private var trialStart: TimeInterval = 0
     private var buffer: [Sample] = []
     private let minInterval = 0.05
 
@@ -56,7 +56,7 @@ public final class Sampler: NSObject, ObservableObject, @preconcurrency CLLocati
 
     public func beginTrial() {
         buffer = []
-        start = ProcessInfo.processInfo.systemUptime
+        trialStart = ProcessInfo.processInfo.systemUptime
         recording = true
         status = "Enregistrement…"
     }
@@ -76,7 +76,7 @@ public final class Sampler: NSObject, ObservableObject, @preconcurrency CLLocati
         liveAccuracy = heading?.headingAccuracy
         guard recording else { return }
         let now = ProcessInfo.processInfo.systemUptime
-        let t = now - start
+        let t = now - trialStart
         if let last = buffer.last, t - last.t < minInterval { return }
         let rate = sqrt(m.rotationRate.x * m.rotationRate.x
                         + m.rotationRate.y * m.rotationRate.y
